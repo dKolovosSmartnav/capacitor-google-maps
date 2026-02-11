@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/ionic-team/capacitor-google-maps/compare/example-app-spm@0.1.0...example-app-spm@0.1.1) (2026-02-11)
+
+**Note:** Version bump only for package example-app-spm
+
+
+
+
+
 # [0.1.0](https://github.com/ionic-team/capacitor-google-maps/compare/example-app-spm@0.0.2...example-app-spm@0.1.0) (2025-12-08)
 
 
