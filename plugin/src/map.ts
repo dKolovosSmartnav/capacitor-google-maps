@@ -380,15 +380,10 @@ export class GoogleMap {
     return res.id;
   }
 
-   /**
+  /**
    * Animation of marker
    */
-  async animateMarker(
-    markerId: string,
-    lat: number,
-    lng: number,
-    duration = 1000
-  ): Promise<void> {
+  async animateMarker(markerId: string, lat: number, lng: number, duration = 1000): Promise<void> {
     await CapacitorGoogleMaps.animateMarker({
       id: this.id,
       markerId,

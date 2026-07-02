@@ -540,5 +540,3 @@ export interface CircleClickCallbackData {
 export interface MyLocationButtonClickCallbackData {
   mapId: string;
 }
-
-

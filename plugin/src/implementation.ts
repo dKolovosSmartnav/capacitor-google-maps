@@ -196,7 +196,7 @@ export interface CapacitorGoogleMapsPlugin extends Plugin {
   addTileOverlay(args: AddTileOverlayArgs): Promise<{ id: string }>;
   removeTileOverlay(args: RemoveTileOverlayArgs): Promise<void>;
   addMarker(args: AddMarkerArgs): Promise<{ id: string }>;
-  animateMarker(options: AnimateMarkerArgs): Promise<void>;
+  animateMarker(options: AnimateMarkerOptions): Promise<void>;
   addMarkers(args: AddMarkersArgs): Promise<{ ids: string[] }>;
   removeMarker(args: RemoveMarkerArgs): Promise<void>;
   removeMarkers(args: RemoveMarkersArgs): Promise<void>;

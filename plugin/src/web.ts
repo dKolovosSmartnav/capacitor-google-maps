@@ -29,7 +29,7 @@ import type {
   AddPolylinesArgs,
   RemovePolylinesArgs,
   RemoveTileOverlayArgs,
-  AnimateMarkerArgs
+  AnimateMarkerArgs,
 } from './implementation';
 
 export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogleMapsPlugin {
@@ -350,7 +350,7 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
     const end = { lat, lng };
     const startTime = performance.now();
 
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       const step = (now: number) => {
         const t = Math.min((now - startTime) / duration, 1);
         const currLat = start.lat + (end.lat - start.lat) * t;
