@@ -2,6 +2,7 @@ import type { Plugin } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type {
+  AnimateMarkerOptions,
   CameraConfig,
   Circle,
   GoogleMapConfig,
@@ -180,6 +181,14 @@ export interface FitBoundsArgs {
   padding?: number;
 }
 
+export interface AnimateMarkerArgs {
+  id: string;
+  markerId: string;
+  lat: number;
+  lng: number;
+  duration?: number;
+}
+
 export interface CapacitorGoogleMapsPlugin extends Plugin {
   create(options: CreateMapArgs): Promise<void>;
   enableTouch(args: { id: string }): Promise<void>;
@@ -187,6 +196,7 @@ export interface CapacitorGoogleMapsPlugin extends Plugin {
   addTileOverlay(args: AddTileOverlayArgs): Promise<{ id: string }>;
   removeTileOverlay(args: RemoveTileOverlayArgs): Promise<void>;
   addMarker(args: AddMarkerArgs): Promise<{ id: string }>;
+  animateMarker(options: AnimateMarkerArgs): Promise<void>;
   addMarkers(args: AddMarkersArgs): Promise<{ ids: string[] }>;
   removeMarker(args: RemoveMarkerArgs): Promise<void>;
   removeMarkers(args: RemoveMarkersArgs): Promise<void>;

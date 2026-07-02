@@ -39,6 +39,7 @@ export interface GoogleMapInterface {
   addTileOverlay(tileOverlay: TileOverlay): Promise<{ id: string }>;
   removeTileOverlay(id: string): Promise<void>;
   addMarker(marker: Marker): Promise<string>;
+  animateMarker(markerId: string, lat: number, lng: number, duration?: number): Promise<void>;
   addMarkers(markers: Marker[]): Promise<string[]>;
   removeMarker(id: string): Promise<void>;
   removeMarkers(ids: string[]): Promise<void>;
@@ -377,6 +378,24 @@ export class GoogleMap {
     });
 
     return res.id;
+  }
+
+   /**
+   * Animation of marker
+   */
+  async animateMarker(
+    markerId: string,
+    lat: number,
+    lng: number,
+    duration = 1000
+  ): Promise<void> {
+    await CapacitorGoogleMaps.animateMarker({
+      id: this.id,
+      markerId,
+      lat,
+      lng,
+      duration,
+    });
   }
 
   /**

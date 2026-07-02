@@ -3,6 +3,7 @@ import Foundation
 import Capacitor
 import GoogleMaps
 import GoogleMapsUtils
+import QuartzCore
 
 extension GMSMapViewType {
     static func fromString(mapType: String) -> GMSMapViewType {
@@ -74,6 +75,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         CAPPluginMethod(name: "addTileOverlay", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeTileOverlay", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addMarker", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "animateMarker", returnType: CAPPluginReturnPromise);
         CAPPluginMethod(name: "addMarkers", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addPolygons", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addPolylines", returnType: CAPPluginReturnPromise),
@@ -290,6 +292,37 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             call.resolve(["id": String(markerId)])
 
+        } catch {
+            handleError(call, error: error)
+        }
+    }
+
+
+    @objc func animateMarker(_ call: CAPPluginCall) {
+        do {
+            guard let id = call.getString("id") else {
+                throw GoogleMapErrors.invalidMapId
+            }
+            guard let markerId = call.getInt("markerId") else {
+                throw GoogleMapErrors.invalidArguments("markerId is missing")
+            }
+            guard let lat = call.getDouble("lat"),
+                  let lng = call.getDouble("lng") else {
+                throw GoogleMapErrors.invalidArguments("lat or lng is missing")
+            }
+            let duration = call.getDouble("duration") ?? 1.0
+
+            guard let map = self.maps[id] else {
+                throw GoogleMapErrors.mapNotFound
+            }
+
+            try map.animateMarker(
+                markerId: markerId,
+                to: LatLng(lat: lat, lng: lng),
+                duration: duration
+            )
+
+            call.resolve()
         } catch {
             handleError(call, error: error)
         }

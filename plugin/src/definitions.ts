@@ -144,6 +144,14 @@ export interface StyleSpan {
   segments?: number;
 }
 
+export interface AnimateMarkerOptions {
+  id: string;
+  markerId: string;
+  lat: number;
+  lng: number;
+  duration?: number;
+}
+
 /**
  * For web, all the javascript Google Maps options are available as
  * GoogleMapConfig extends google.maps.MapOptions.
@@ -532,3 +540,5 @@ export interface CircleClickCallbackData {
 export interface MyLocationButtonClickCallbackData {
   mapId: string;
 }
+
+
