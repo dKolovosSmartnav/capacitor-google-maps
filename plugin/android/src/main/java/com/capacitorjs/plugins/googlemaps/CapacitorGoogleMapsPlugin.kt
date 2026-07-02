@@ -881,7 +881,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
             val bounds = boundsObjectToRect(boundsObj)
 
-            map.updateRender(bounds)
+            // map.updateRender(bounds)
 
             call.resolve()
         } catch (e: GoogleMapsError) {
@@ -906,7 +906,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
             val bounds = boundsObjectToRect(boundsObj)
 
-            map.updateRender(bounds)
+            //map.updateRender(bounds)
 
             call.resolve()
         } catch (e: GoogleMapsError) {
