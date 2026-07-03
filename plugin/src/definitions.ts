@@ -149,6 +149,7 @@ export interface AnimateMarkerOptions {
   markerId: string;
   lat: number;
   lng: number;
+  bearing: number;
   duration?: number;
 }
 

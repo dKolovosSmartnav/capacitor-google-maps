@@ -512,7 +512,7 @@ addMarker(marker: Marker) => Promise<string>
 ### animateMarker(...)
 
 ```typescript
-animateMarker(markerId: string, lat: number, lng: number, duration?: number | undefined) => Promise<void>
+animateMarker(markerId: string, lat: number, lng: number, bearing: number, duration?: number | undefined) => Promise<void>
 ```
 
 | Param          | Type                |
@@ -520,6 +520,7 @@ animateMarker(markerId: string, lat: number, lng: number, duration?: number | un
 | **`markerId`** | <code>string</code> |
 | **`lat`**      | <code>number</code> |
 | **`lng`**      | <code>number</code> |
+| **`bearing`**  | <code>number</code> |
 | **`duration`** | <code>number</code> |
 
 --------------------

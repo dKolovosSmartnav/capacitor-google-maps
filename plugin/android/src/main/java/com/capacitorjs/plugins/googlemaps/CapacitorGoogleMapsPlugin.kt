@@ -46,7 +46,6 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
         MapsInitializer.initialize(this.context, MapsInitializer.Renderer.LATEST, this)
 
-
         this.bridge.webView.setOnTouchListener(
                 object : View.OnTouchListener {
                     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -94,8 +93,13 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
     override fun onMapsSdkInitialized(renderer: MapsInitializer.Renderer) {
         when (renderer) {
-            MapsInitializer.Renderer.LATEST -> Logger.debug("Capacitor Google Maps", "Latest Google Maps renderer enabled")
-            MapsInitializer.Renderer.LEGACY -> Logger.debug("Capacitor Google Maps", "Legacy Google Maps renderer enabled - Cloud based map styling and advanced drawing not available")
+            MapsInitializer.Renderer.LATEST ->
+                    Logger.debug("Capacitor Google Maps", "Latest Google Maps renderer enabled")
+            MapsInitializer.Renderer.LEGACY ->
+                    Logger.debug(
+                            "Capacitor Google Maps",
+                            "Legacy Google Maps renderer enabled - Cloud based map styling and advanced drawing not available"
+                    )
         }
     }
 
@@ -291,6 +295,36 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
     }
 
     @PluginMethod
+    fun animateMarker(call: PluginCall) {
+        try {
+            val id = call.getString("id")
+            id ?: throw InvalidMapIdError()
+
+            val markerId = call.getString("markerId")
+            markerId ?: throw InvalidArgumentsError("markerId is missing")
+
+            val lat = call.getDouble("lat")
+            val lng = call.getDouble("lng")
+            val bearing = call.getDouble("bearing")
+            if (lat == null || lng == null) {
+                throw InvalidArgumentsError("lat or lng is missing")
+            }
+            val duration = call.getLong("duration", 1000L)
+
+            val map = maps[id] ?: throw MapNotFoundError()
+
+            Log.i("Bearing of marker to animate : " , bearing.toString())
+            map.animateMarker(markerId, lat, lng, bearing!!, duration!!) { result ->
+                result.onSuccess { call.resolve() }.onFailure { error -> throw error }
+            }
+        } catch (e: GoogleMapsError) {
+            handleError(call, e)
+        } catch (e: Exception) {
+            handleError(call, e)
+        }
+    }
+
+    @PluginMethod
     fun addMarkers(call: PluginCall) {
         try {
             val id = call.getString("id")
@@ -367,7 +401,6 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
                 res.put("ids", jsonIDs)
                 call.resolve(res)
             }
-
         } catch (e: GoogleMapsError) {
             handleError(call, e)
         } catch (e: Exception) {
@@ -447,7 +480,6 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
                 res.put("ids", jsonIDs)
                 call.resolve(res)
             }
-
         } catch (e: GoogleMapsError) {
             handleError(call, e)
         } catch (e: Exception) {
@@ -456,47 +488,46 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
     }
 
     @PluginMethod
-     fun addPolylines(call: PluginCall) {
-         try  {
-             val id = call.getString("id")
-             id ?: throw InvalidMapIdError()
+    fun addPolylines(call: PluginCall) {
+        try {
+            val id = call.getString("id")
+            id ?: throw InvalidMapIdError()
 
-             val polylinesObjectArray = call.getArray("polylines", null)
-             polylinesObjectArray ?: throw InvalidArgumentsError("polylines array is missing")
+            val polylinesObjectArray = call.getArray("polylines", null)
+            polylinesObjectArray ?: throw InvalidArgumentsError("polylines array is missing")
 
-             if (polylinesObjectArray.length() == 0) {
-                 throw InvalidArgumentsError("polylines requires at least one line")
-             }
+            if (polylinesObjectArray.length() == 0) {
+                throw InvalidArgumentsError("polylines requires at least one line")
+            }
 
-             val map = maps[id]
-             map ?: throw MapNotFoundError()
+            val map = maps[id]
+            map ?: throw MapNotFoundError()
 
-             val polylines: MutableList<CapacitorGoogleMapPolyline> = mutableListOf()
+            val polylines: MutableList<CapacitorGoogleMapPolyline> = mutableListOf()
 
-             for (i in 0 until polylinesObjectArray.length()) {
-                 val polylineObj = polylinesObjectArray.getJSONObject(i)
-                 val polyline = CapacitorGoogleMapPolyline(polylineObj)
+            for (i in 0 until polylinesObjectArray.length()) {
+                val polylineObj = polylinesObjectArray.getJSONObject(i)
+                val polyline = CapacitorGoogleMapPolyline(polylineObj)
 
-                 polylines.add(polyline)
-             }
+                polylines.add(polyline)
+            }
 
-             map.addPolylines(polylines) { result ->
-                 val ids = result.getOrThrow()
+            map.addPolylines(polylines) { result ->
+                val ids = result.getOrThrow()
 
-                 val jsonIDs = JSONArray()
-                 ids.forEach { jsonIDs.put(it) }
+                val jsonIDs = JSONArray()
+                ids.forEach { jsonIDs.put(it) }
 
-                 val res = JSObject()
-                 res.put("ids", jsonIDs)
-                 call.resolve(res)
-             }
-
-         } catch (e: GoogleMapsError) {
-             handleError(call, e)
-         } catch (e: Exception) {
-             handleError(call, e)
-         }
-     }
+                val res = JSObject()
+                res.put("ids", jsonIDs)
+                call.resolve(res)
+            }
+        } catch (e: GoogleMapsError) {
+            handleError(call, e)
+        } catch (e: Exception) {
+            handleError(call, e)
+        }
+    }
 
     @PluginMethod
     fun removeCircles(call: PluginCall) {
@@ -546,13 +577,16 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             val map = maps[id]
             map ?: throw MapNotFoundError()
 
-            map.enableClustering(minClusterSize,  { err ->
-                if (err != null) {
-                    throw err
-                }
+            map.enableClustering(
+                    minClusterSize,
+                    { err ->
+                        if (err != null) {
+                            throw err
+                        }
 
-                call.resolve()
-            })
+                        call.resolve()
+                    }
+            )
         } catch (e: GoogleMapsError) {
             handleError(call, e)
         } catch (e: Exception) {
@@ -722,7 +756,6 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             map ?: throw MapNotFoundError()
 
             map.getMapType() { type, err ->
-
                 if (err != null) {
                     throw err
                 }
@@ -906,7 +939,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
             val bounds = boundsObjectToRect(boundsObj)
 
-            //map.updateRender(bounds)
+            // map.updateRender(bounds)
 
             call.resolve()
         } catch (e: GoogleMapsError) {
@@ -934,7 +967,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
             val events = cachedTouchEvents[id]
             if (events != null) {
-                while(events.size > 0) {
+                while (events.size > 0) {
                     val event = events.first()
                     if (focus) {
                         map.dispatchTouchEvent(event)
@@ -1005,7 +1038,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             map ?: throw MapNotFoundError()
 
             val boundsObject =
-                call.getObject("bounds") ?: throw InvalidArgumentsError("bounds is missing")
+                    call.getObject("bounds") ?: throw InvalidArgumentsError("bounds is missing")
 
             val padding = call.getInt("padding", 0)!!
 
@@ -1043,10 +1076,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
     }
 
     private fun createLatLng(point: JSObject): LatLng {
-        return LatLng(
-            point.getDouble("lat"),
-            point.getDouble("lng")
-        )
+        return LatLng(point.getDouble("lat"), point.getDouble("lng"))
     }
 
     private fun createLatLngBounds(boundsObject: JSObject): LatLngBounds {

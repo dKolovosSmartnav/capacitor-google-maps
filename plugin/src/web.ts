@@ -337,7 +337,7 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
   }
 
   async animateMarker(_args: AnimateMarkerArgs): Promise<void> {
-    const { id, markerId, lat, lng, duration = 1000 } = _args;
+    const { id, markerId, lat, lng, bearing, duration = 1000 } = _args;
     const mapData = this.maps[id];
     if (!mapData) {
       throw new Error(`Map with id '${id}' not found`);
@@ -346,16 +346,36 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
     if (!marker) {
       throw new Error(`Marker '${markerId}' not found on map '${id}'`);
     }
+
     const start = marker.position as google.maps.LatLngLiteral;
     const end = { lat, lng };
+
+    // Read the marker's current rotation (stored on the element from a previous animation)
+    const content = marker.content as HTMLElement | null;
+    const startBearing = content ? parseFloat(content.dataset.bearing ?? '0') : 0;
+
+    // Shortest-path delta: normalize to (-180, 180]
+    let deltaBearing = 0;
+    if (bearing !== undefined && content) {
+      deltaBearing = ((bearing - startBearing + 540) % 360) - 180;
+    }
+
     const startTime = performance.now();
 
     return new Promise<void>((resolve) => {
       const step = (now: number) => {
         const t = Math.min((now - startTime) / duration, 1);
-        const currLat = start.lat + (end.lat - start.lat) * t;
-        const currLng = start.lng + (end.lng - start.lng) * t;
-        marker.position = { lat: currLat, lng: currLng };
+        marker.position = {
+          lat: start.lat + (end.lat - start.lat) * t,
+          lng: start.lng + (end.lng - start.lng) * t,
+        };
+
+        if (bearing !== undefined && content) {
+          const currBearing = (startBearing + deltaBearing * t + 360) % 360;
+          content.style.transform = `rotate(${currBearing}deg)`;
+          content.dataset.bearing = String(currBearing);
+        }
+
         if (t < 1) {
           requestAnimationFrame(step);
         } else {

@@ -342,43 +342,48 @@ class CapacitorGoogleMap(
         }
     }
 
-    fun animateMarker(markerId: String,lat: Double,lng: Double,duration: Long, callback: (Result<Unit>) -> Unit) {
- try {
-        googleMap ?: throw GoogleMapNotAvailable()
+    fun animateMarker(markerId: String, lat: Double, lng: Double, bearing: Double, duration: Long, callback: (Result<Unit>) -> Unit) {
+        try {
+            googleMap ?: throw GoogleMapNotAvailable()
 
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-            val wrapper = markers[markerId] ?: throw MarkerNotFoundError()
-            val marker = wrapper.googleMapMarker
-                ?: throw GoogleMapsError("GoogleMap Marker not available")
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val wrapper = markers[markerId] ?: throw MarkerNotFoundError()
+                    val marker = wrapper.googleMapMarker
+                        ?: throw GoogleMapsError("GoogleMap Marker not available")
 
-            val startPos = marker.position
-            val endPos = LatLng(lat, lng)
+                    val startPos = marker.position
+                    val endPos = LatLng(lat, lng)
 
-            ValueAnimator.ofFloat(0f, 1f).apply {
-                this.duration = duration
-                addUpdateListener { anim ->
-                val fraction = anim.animatedValue as Float
-                val newLat = startPos.latitude +
-                    fraction * (endPos.latitude - startPos.latitude)
-                val newLng = startPos.longitude +
-                    fraction * (endPos.longitude - startPos.longitude)
-                marker.position = LatLng(newLat, newLng)
+                    // Shortest-path rotation delta, normalized to (-180, 180]
+                    val startBearing = marker.rotation
+                    val deltaBearing = ((bearing.toFloat() - startBearing + 540f) % 360f) - 180f
+
+                    ValueAnimator.ofFloat(0f, 1f).apply {
+                        this.duration = duration
+                        addUpdateListener { anim ->
+                            val fraction = anim.animatedValue as Float
+                            val newLat = startPos.latitude +
+                                    fraction * (endPos.latitude - startPos.latitude)
+                            val newLng = startPos.longitude +
+                                    fraction * (endPos.longitude - startPos.longitude)
+                            marker.position = LatLng(newLat, newLng)
+                            marker.rotation = (startBearing + deltaBearing * fraction + 360f) % 360f
+                        }
+                        addListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator) {
+                                callback(Result.success(Unit))
+                            }
+                        })
+                    }.start()
+                } catch (e: GoogleMapsError) {
+                    callback(Result.failure(e))
+                } catch (e: Exception) {
+                    callback(Result.failure(GoogleMapsError(e.localizedMessage ?: "Animation error")))
                 }
-                addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    callback(Result.success(Unit))
-                }
-                })
-            }.start()
-            } catch (e: GoogleMapsError) {
-            callback(Result.failure(e))
-            } catch (e: Exception) {
-            callback(Result.failure(GoogleMapsError(e.localizedMessage ?: "Animation error")))
             }
-        }
         } catch (e: GoogleMapsError) {
-        callback(Result.failure(e))
+            callback(Result.failure(e))
         }
     }
 
