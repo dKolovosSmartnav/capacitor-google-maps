@@ -295,7 +295,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
     }
 
     @PluginMethod
-    fun animateMarker(call: PluginCall) {
+    fun updateMarker(call: PluginCall) {
         try {
             val id = call.getString("id")
             id ?: throw InvalidMapIdError()
@@ -314,7 +314,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             val map = maps[id] ?: throw MapNotFoundError()
 
             Log.i("Bearing of marker to animate : " , bearing.toString())
-            map.animateMarker(markerId, lat, lng, bearing!!, duration!!) { result ->
+            map.updateMarker(markerId, lat, lng, bearing!!, duration!!) { result ->
                 result.onSuccess { call.resolve() }.onFailure { error -> throw error }
             }
         } catch (e: GoogleMapsError) {

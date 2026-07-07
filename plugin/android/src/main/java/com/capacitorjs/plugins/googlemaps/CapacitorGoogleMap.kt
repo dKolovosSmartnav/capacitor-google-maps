@@ -342,7 +342,7 @@ class CapacitorGoogleMap(
         }
     }
 
-    fun animateMarker(markerId: String, lat: Double, lng: Double, bearing: Double, duration: Long, callback: (Result<Unit>) -> Unit) {
+    fun updateMarker(markerId: String, lat: Double, lng: Double, bearing: Double, duration: Long, callback: (Result<Unit>) -> Unit) {
         try {
             googleMap ?: throw GoogleMapNotAvailable()
 

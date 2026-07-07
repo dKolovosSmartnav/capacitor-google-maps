@@ -364,7 +364,7 @@ Vue({
 * [`addTileOverlay(...)`](#addtileoverlay)
 * [`removeTileOverlay(...)`](#removetileoverlay)
 * [`addMarker(...)`](#addmarker)
-* [`animateMarker(...)`](#animatemarker)
+* [`updateMarker(...)`](#updatemarker)
 * [`addMarkers(...)`](#addmarkers)
 * [`removeMarker(...)`](#removemarker)
 * [`removeMarkers(...)`](#removemarkers)
@@ -509,19 +509,15 @@ addMarker(marker: Marker) => Promise<string>
 --------------------
 
 
-### animateMarker(...)
+### updateMarker(...)
 
 ```typescript
-animateMarker(markerId: string, lat: number, lng: number, bearing: number, duration?: number | undefined) => Promise<void>
+updateMarker(options: UpdateMarkerOptions) => Promise<void>
 ```
 
-| Param          | Type                |
-| -------------- | ------------------- |
-| **`markerId`** | <code>string</code> |
-| **`lat`**      | <code>number</code> |
-| **`lng`**      | <code>number</code> |
-| **`bearing`**  | <code>number</code> |
-| **`duration`** | <code>number</code> |
+| Param         | Type                                                                |
+| ------------- | ------------------------------------------------------------------- |
+| **`options`** | <code><a href="#updatemarkeroptions">UpdateMarkerOptions</a></code> |
 
 --------------------
 
@@ -1120,6 +1116,18 @@ https://tools.ietf.org/html/rfc7946#section-3.1.2
 | ------------ | ------------------- | ----------- |
 | **`line`**   | <code>number</code> | &gt;= 1     |
 | **`column`** | <code>number</code> | &gt;= 0     |
+
+
+#### UpdateMarkerOptions
+
+| Prop           | Type                |
+| -------------- | ------------------- |
+| **`id`**       | <code>string</code> |
+| **`markerId`** | <code>string</code> |
+| **`lat`**      | <code>number</code> |
+| **`lng`**      | <code>number</code> |
+| **`bearing`**  | <code>number</code> |
+| **`duration`** | <code>number</code> |
 
 
 #### Polygon

@@ -144,7 +144,7 @@ export interface StyleSpan {
   segments?: number;
 }
 
-export interface AnimateMarkerOptions {
+export interface UpdateMarkerOptions {
   id: string;
   markerId: string;
   lat: number;

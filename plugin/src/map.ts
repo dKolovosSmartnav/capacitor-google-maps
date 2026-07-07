@@ -20,6 +20,7 @@ import type {
   Polyline,
   PolylineCallbackData,
   TileOverlay,
+  UpdateMarkerOptions,
 } from './definitions';
 import { LatLngBounds, MapType } from './definitions';
 import type { CreateMapArgs } from './implementation';
@@ -39,7 +40,7 @@ export interface GoogleMapInterface {
   addTileOverlay(tileOverlay: TileOverlay): Promise<{ id: string }>;
   removeTileOverlay(id: string): Promise<void>;
   addMarker(marker: Marker): Promise<string>;
-  animateMarker(markerId: string, lat: number, lng: number, bearing: number, duration?: number): Promise<void>;
+  updateMarker(options: UpdateMarkerOptions): Promise<void>;
   addMarkers(markers: Marker[]): Promise<string[]>;
   removeMarker(id: string): Promise<void>;
   removeMarkers(ids: string[]): Promise<void>;
@@ -384,7 +385,7 @@ export class GoogleMap {
    * Animation of marker
    */
   async animateMarker(markerId: string, lat: number, lng: number, bearing: number, duration = 1000): Promise<void> {
-    await CapacitorGoogleMaps.animateMarker({
+    await CapacitorGoogleMaps.updateMarker({
       id: this.id,
       markerId,
       lat,

@@ -29,7 +29,7 @@ import type {
   AddPolylinesArgs,
   RemovePolylinesArgs,
   RemoveTileOverlayArgs,
-  AnimateMarkerArgs,
+  UpdateMarkerArgs,
 } from './implementation';
 
 export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogleMapsPlugin {
@@ -336,7 +336,7 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
     return { id: id };
   }
 
-  async animateMarker(_args: AnimateMarkerArgs): Promise<void> {
+  async updateMarker(_args: UpdateMarkerArgs): Promise<void> {
     const { id, markerId, lat, lng, bearing, duration = 1000 } = _args;
     const mapData = this.maps[id];
     if (!mapData) {

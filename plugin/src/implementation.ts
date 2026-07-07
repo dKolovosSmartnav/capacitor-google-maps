@@ -2,7 +2,7 @@ import type { Plugin } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type {
-  AnimateMarkerOptions,
+  UpdateMarkerOptions,
   CameraConfig,
   Circle,
   GoogleMapConfig,
@@ -181,7 +181,7 @@ export interface FitBoundsArgs {
   padding?: number;
 }
 
-export interface AnimateMarkerArgs {
+export interface UpdateMarkerArgs {
   id: string;
   markerId: string;
   lat: number;
@@ -197,7 +197,7 @@ export interface CapacitorGoogleMapsPlugin extends Plugin {
   addTileOverlay(args: AddTileOverlayArgs): Promise<{ id: string }>;
   removeTileOverlay(args: RemoveTileOverlayArgs): Promise<void>;
   addMarker(args: AddMarkerArgs): Promise<{ id: string }>;
-  animateMarker(options: AnimateMarkerOptions): Promise<void>;
+  updateMarker(options: UpdateMarkerOptions): Promise<void>;
   addMarkers(args: AddMarkersArgs): Promise<{ ids: string[] }>;
   removeMarker(args: RemoveMarkerArgs): Promise<void>;
   removeMarkers(args: RemoveMarkersArgs): Promise<void>;
