@@ -1,6 +1,6 @@
+import Capacitor
 import Foundation
 import GoogleMaps
-import Capacitor
 import GoogleMapsUtils
 import QuartzCore
 
@@ -26,8 +26,12 @@ class GMViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let camera = GMSCameraPosition.camera(withLatitude: cameraPosition["latitude"] ?? 0, longitude: cameraPosition["longitude"] ?? 0, zoom: Float(cameraPosition["zoom"] ?? 12))
-        let frame = CGRect(x: mapViewBounds["x"] ?? 0, y: mapViewBounds["y"] ?? 0, width: mapViewBounds["width"] ?? 0, height: mapViewBounds["height"] ?? 0)
+        let camera = GMSCameraPosition.camera(
+            withLatitude: cameraPosition["latitude"] ?? 0,
+            longitude: cameraPosition["longitude"] ?? 0, zoom: Float(cameraPosition["zoom"] ?? 12))
+        let frame = CGRect(
+            x: mapViewBounds["x"] ?? 0, y: mapViewBounds["y"] ?? 0,
+            width: mapViewBounds["width"] ?? 0, height: mapViewBounds["height"] ?? 0)
         if let id = mapId {
             let gmsId = GMSMapID(identifier: id)
             self.GMapView = GMSMapView(frame: frame, mapID: gmsId, camera: camera)
@@ -42,12 +46,14 @@ class GMViewController: UIViewController {
     func initClusterManager(_ minClusterSize: Int?) {
         let iconGenerator = GMUDefaultClusterIconGenerator()
         let algorithm = GMUNonHierarchicalDistanceBasedAlgorithm()
-        let renderer = GMUDefaultClusterRenderer(mapView: self.GMapView, clusterIconGenerator: iconGenerator)
+        let renderer = GMUDefaultClusterRenderer(
+            mapView: self.GMapView, clusterIconGenerator: iconGenerator)
         self.minimumClusterSize = minClusterSize
         if let minClusterSize = minClusterSize {
             renderer.minimumClusterSize = UInt(minClusterSize)
         }
-        self.clusterManager = GMUClusterManager(map: self.GMapView, algorithm: algorithm, renderer: renderer)
+        self.clusterManager = GMUClusterManager(
+            map: self.GMapView, algorithm: algorithm, renderer: renderer)
     }
 
     func destroyClusterManager() {
@@ -109,16 +115,17 @@ public class Map {
                 "width": self.config.width,
                 "height": self.config.height,
                 "x": self.config.x,
-                "y": self.config.y
+                "y": self.config.y,
             ]
 
             self.mapViewController.cameraPosition = [
                 "latitude": self.config.center.lat,
                 "longitude": self.config.center.lng,
-                "zoom": self.config.zoom
+                "zoom": self.config.zoom,
             ]
 
-            self.targetViewController = self.getTargetContainer(refWidth: self.config.width, refHeight: self.config.height)
+            self.targetViewController = self.getTargetContainer(
+                refWidth: self.config.width, refHeight: self.config.height)
 
             if let target = self.targetViewController {
                 target.tag = Map.MAP_TAG
@@ -141,8 +148,10 @@ public class Map {
                 }
             }
 
-            let minZoom = self.config.minZoom.map { Float($0) } ?? self.mapViewController.GMapView.minZoom
-            let maxZoom = self.config.maxZoom.map { Float($0) } ?? self.mapViewController.GMapView.maxZoom
+            let minZoom =
+                self.config.minZoom.map { Float($0) } ?? self.mapViewController.GMapView.minZoom
+            let maxZoom =
+                self.config.maxZoom.map { Float($0) } ?? self.mapViewController.GMapView.maxZoom
             self.mapViewController.GMapView.setMinZoom(minZoom, maxZoom: maxZoom)
 
             if let mapTypeId = self.config.mapTypeId {
@@ -168,9 +177,11 @@ public class Map {
                 self.mapViewController.GMapView.animate(toBearing: heading)
             }
 
-            self.delegate.notifyListeners("onMapReady", data: [
-                "mapId": self.id
-            ])
+            self.delegate.notifyListeners(
+                "onMapReady",
+                data: [
+                    "mapId": self.id
+                ])
         }
     }
 
@@ -179,7 +190,8 @@ public class Map {
             let newWidth = round(Double(mapBounds.width))
             let newHeight = round(Double(mapBounds.height))
             let isWidthEqual = round(Double(self.mapViewController.view.bounds.width)) == newWidth
-            let isHeightEqual = round(Double(self.mapViewController.view.bounds.height)) == newHeight
+            let isHeightEqual =
+                round(Double(self.mapViewController.view.bounds.height)) == newHeight
 
             if !isWidthEqual || !isHeightEqual {
                 CATransaction.begin()
@@ -193,7 +205,9 @@ public class Map {
 
     func rebindTargetContainer(mapBounds: CGRect) {
         DispatchQueue.main.sync {
-            if let target = self.getTargetContainer(refWidth: round(Double(mapBounds.width)), refHeight: round(Double(mapBounds.height))) {
+            if let target = self.getTargetContainer(
+                refWidth: round(Double(mapBounds.width)), refHeight: round(Double(mapBounds.height))
+            ) {
                 self.targetViewController = target
                 target.tag = Map.MAP_TAG
                 target.removeAllSubview()
@@ -210,7 +224,9 @@ public class Map {
     private func getTargetContainer(refWidth: Double, refHeight: Double) -> UIView? {
         if let bridge = self.delegate.bridge {
             for item in bridge.webView!.getAllSubViews() {
-                let isScrollView = item.isKind(of: NSClassFromString("WKChildScrollView")!) || item.isKind(of: NSClassFromString("WKScrollView")!)
+                let isScrollView =
+                    item.isKind(of: NSClassFromString("WKChildScrollView")!)
+                    || item.isKind(of: NSClassFromString("WKScrollView")!)
                 let isBridgeScrollView = item.isEqual(bridge.webView?.scrollView)
 
                 if isScrollView && !isBridgeScrollView {
@@ -222,9 +238,12 @@ public class Map {
                     let actualHeightCeil = ceil(height / 2)
 
                     let isWidthEqual = width == refWidth
-                    let isHeightEqual = actualHeightFloor == refHeight || actualHeightCeil == refHeight
+                    let isHeightEqual =
+                        actualHeightFloor == refHeight || actualHeightCeil == refHeight
 
-                    if isWidthEqual && isHeightEqual && item.tag < self.targetViewController?.tag ?? Map.MAP_TAG {
+                    if isWidthEqual && isHeightEqual
+                        && item.tag < self.targetViewController?.tag ?? Map.MAP_TAG
+                    {
                         return item
                     }
                 }
@@ -245,7 +264,9 @@ public class Map {
 
     func enableTouch() {
         DispatchQueue.main.async {
-            if let target = self.targetViewController, let itemIndex = WKWebView.disabledTargets.firstIndex(of: target) {
+            if let target = self.targetViewController,
+                let itemIndex = WKWebView.disabledTargets.firstIndex(of: target)
+            {
                 WKWebView.disabledTargets.remove(at: itemIndex)
             }
         }
@@ -256,7 +277,8 @@ public class Map {
 
         DispatchQueue.main.sync {
             let urlConstructor: GMSTileURLConstructor = { x, y, zoom in
-                URL(string: tileOverlay.url
+                URL(
+                    string: tileOverlay.url
                         .replacingOccurrences(of: "{x}", with: "\(x)")
                         .replacingOccurrences(of: "{y}", with: "\(y)")
                         .replacingOccurrences(of: "{z}", with: "\(zoom)")
@@ -314,11 +336,24 @@ public class Map {
         return markerHash
     }
 
-    func animateMarker(markerId: Int, to target: LatLng, duration: Double) throws {
+    func updateMarker(
+        markerId: Int, to target: LatLng, markerIcon: String?, bearing: Double?, duration: Double
+    ) throws {
         guard let marker = markers[markerId] else {
             throw GoogleMapErrors.markerNotFound
         }
+
         DispatchQueue.main.async {
+            // Swap icon if provided
+            if let iconUrl = markerIcon {
+                self.updateMarkerIcon(marker: marker, markerId: markerId, iconUrl: iconUrl)
+            }
+
+            // Set rotation directly to the given bearing — no interpolation from previous value
+            if let bearing = bearing {
+                marker.rotation = bearing.truncatingRemainder(dividingBy: 360)
+            }
+
             CATransaction.begin()
             CATransaction.setAnimationDuration(duration)
             marker.position = CLLocationCoordinate2D(
@@ -326,6 +361,39 @@ public class Map {
                 longitude: target.lng
             )
             CATransaction.commit()
+        }
+    }
+
+    private func updateMarkerIcon(marker: GMSMarker, markerId: Int, iconUrl: String) {
+        let iconSize = self.markerIconSizes[markerId]
+
+        func applyIcon(_ image: UIImage) {
+            marker.icon = iconSize != nil ? image.resizeImageTo(size: iconSize!) : image
+        }
+
+        if let cachedImage = self.markerIcons[iconUrl] {
+            applyIcon(cachedImage)
+        } else if iconUrl.starts(with: "https:") {
+            guard let url = URL(string: iconUrl) else { return }
+            URLSession.shared.dataTask(with: url) { (data, _, _) in
+                DispatchQueue.main.async {
+                    if let data = data, let image = UIImage(data: data) {
+                        self.markerIcons[iconUrl] = image
+                        applyIcon(image)
+                    }
+                }
+            }.resume()
+        } else if let image = UIImage(named: "public/\(iconUrl)") {
+            self.markerIcons[iconUrl] = image
+            applyIcon(image)
+        } else {
+            var detailedMessage = ""
+            if iconUrl.hasSuffix(".svg") {
+                detailedMessage = "SVG not supported."
+            }
+            print(
+                "CapacitorGoogleMaps Warning: could not load image '\(iconUrl)'. \(detailedMessage) Using default marker icon."
+            )
         }
     }
 
@@ -505,7 +573,8 @@ public class Map {
         let animate = config.animate ?? false
 
         DispatchQueue.main.sync {
-            let newCamera = GMSCameraPosition(latitude: lat, longitude: lng, zoom: zoom, bearing: bearing, viewingAngle: angle)
+            let newCamera = GMSCameraPosition(
+                latitude: lat, longitude: lng, zoom: zoom, bearing: bearing, viewingAngle: angle)
 
             if animate {
                 self.mapViewController.GMapView.animate(to: newCamera)
@@ -552,7 +621,9 @@ public class Map {
 
     func setPadding(padding: GoogleMapPadding) throws {
         DispatchQueue.main.sync {
-            let mapInsets = UIEdgeInsets(top: CGFloat(padding.top), left: CGFloat(padding.left), bottom: CGFloat(padding.bottom), right: CGFloat(padding.right))
+            let mapInsets = UIEdgeInsets(
+                top: CGFloat(padding.top), left: CGFloat(padding.left),
+                bottom: CGFloat(padding.bottom), right: CGFloat(padding.right))
             self.mapViewController.GMapView.padding = mapInsets
         }
     }
@@ -575,7 +646,8 @@ public class Map {
     }
 
     func getMapLatLngBounds() -> GMSCoordinateBounds? {
-        return GMSCoordinateBounds(region: self.mapViewController.GMapView.projection.visibleRegion())
+        return GMSCoordinateBounds(
+            region: self.mapViewController.GMapView.projection.visibleRegion())
     }
 
     func fitBounds(bounds: GMSCoordinateBounds, padding: CGFloat) {
@@ -611,7 +683,8 @@ public class Map {
         newCircle.strokeColor = circle.strokeColor
         newCircle.strokeWidth = circle.strokeWidth
         newCircle.fillColor = circle.fillColor
-        newCircle.position = CLLocationCoordinate2D(latitude: circle.center.lat, longitude: circle.center.lng)
+        newCircle.position = CLLocationCoordinate2D(
+            latitude: circle.center.lat, longitude: circle.center.lng)
         newCircle.radius = CLLocationDistance(circle.radius)
         newCircle.isTappable = circle.tappable ?? false
         newCircle.zIndex = circle.zIndex
@@ -638,7 +711,8 @@ public class Map {
         polygon.shapes.forEach { shape in
             if shapeIndex == 0 {
                 shape.forEach { coord in
-                    outerShape.add(CLLocationCoordinate2D(latitude: coord.lat, longitude: coord.lng))
+                    outerShape.add(
+                        CLLocationCoordinate2D(latitude: coord.lat, longitude: coord.lng))
                 }
             } else {
                 let holeShape = GMSMutablePath()
@@ -694,7 +768,8 @@ public class Map {
 
     private func buildMarker(marker: Marker) -> GMSMarker {
         let newMarker = GMSMarker()
-        newMarker.position = CLLocationCoordinate2D(latitude: marker.coordinate.lat, longitude: marker.coordinate.lng)
+        newMarker.position = CLLocationCoordinate2D(
+            latitude: marker.coordinate.lat, longitude: marker.coordinate.lng)
         newMarker.title = marker.title
         newMarker.snippet = marker.snippet
         newMarker.isFlat = marker.isFlat ?? false
@@ -731,7 +806,9 @@ public class Map {
                         detailedMessage = "SVG not supported."
                     }
 
-                    print("CapacitorGoogleMaps Warning: could not load image '\(iconUrl)'. \(detailedMessage)  Using default marker icon.")
+                    print(
+                        "CapacitorGoogleMaps Warning: could not load image '\(iconUrl)'. \(detailedMessage)  Using default marker icon."
+                    )
                 }
             }
         } else {
@@ -762,7 +839,9 @@ extension WKWebView {
             return nil
         }
 
-        if let typeClass = NSClassFromString("WKChildScrollView"), let tempHitView = hitView, tempHitView.isKind(of: typeClass) {
+        if let typeClass = NSClassFromString("WKChildScrollView"), let tempHitView = hitView,
+            tempHitView.isKind(of: typeClass)
+        {
             for item in tempHitView.subviews.reversed() {
                 let convertPoint = item.convert(point, from: self)
                 if let hitTestView = item.hitTest(convertPoint, with: event) {
