@@ -1120,14 +1120,15 @@ https://tools.ietf.org/html/rfc7946#section-3.1.2
 
 #### UpdateMarkerOptions
 
-| Prop           | Type                |
-| -------------- | ------------------- |
-| **`id`**       | <code>string</code> |
-| **`markerId`** | <code>string</code> |
-| **`lat`**      | <code>number</code> |
-| **`lng`**      | <code>number</code> |
-| **`bearing`**  | <code>number</code> |
-| **`duration`** | <code>number</code> |
+| Prop             | Type                |
+| ---------------- | ------------------- |
+| **`id`**         | <code>string</code> |
+| **`markerId`**   | <code>string</code> |
+| **`lat`**        | <code>number</code> |
+| **`lng`**        | <code>number</code> |
+| **`bearing`**    | <code>number</code> |
+| **`duration`**   | <code>number</code> |
+| **`markerIcon`** | <code>string</code> |
 
 
 #### Polygon

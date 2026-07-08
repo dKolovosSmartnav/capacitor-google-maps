@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.collections.get
 
 class CapacitorGoogleMap(
         val id: String,
@@ -342,7 +343,7 @@ class CapacitorGoogleMap(
         }
     }
 
-    fun updateMarker(markerId: String, lat: Double, lng: Double, bearing: Double, duration: Long, callback: (Result<Unit>) -> Unit) {
+    fun updateMarker(markerId: String, lat: Double, lng: Double, markerIcon: String, bearing: Double?, duration: Long, callback: (Result<Unit>) -> Unit) {
         try {
             googleMap ?: throw GoogleMapNotAvailable()
 
@@ -352,12 +353,40 @@ class CapacitorGoogleMap(
                     val marker = wrapper.googleMapMarker
                         ?: throw GoogleMapsError("GoogleMap Marker not available")
 
+                    if (markerIcons.contains(markerIcon)) {
+                        val cachedBitmap = markerIcons[markerIcon]
+                        marker.setIcon(getResizedIcon(cachedBitmap!!, wrapper))
+                    } else {
+                        try {
+                            var stream: InputStream? = null
+                            if (markerIcon.startsWith("https:")) {
+                                stream = URL(markerIcon).openConnection().getInputStream()
+                            } else {
+                                stream = delegate.context.assets.open("public/${markerIcon}")
+                            }
+                            var bitmap = BitmapFactory.decodeStream(stream)
+                            markerIcons[markerIcon] = bitmap
+                            marker.setIcon(getResizedIcon(bitmap, wrapper))
+                        } catch (e: Exception) {
+                            var detailedMessage = "${e.javaClass} - ${e.localizedMessage}"
+                            if (markerIcon.endsWith(".svg")) {
+                                detailedMessage = "SVG not supported"
+                            }
+
+                            Log.w(
+                                "CapacitorGoogleMaps",
+                                "Could not load image '${markerIcon}': ${detailedMessage}. Using default marker icon."
+                            )
+                        }
+                    }
+
+                    // Set rotation directly to the given bearing — no interpolation from previous value
+                    if (bearing != null) {
+                        marker.rotation = bearing.toFloat() % 360f
+                    }
+
                     val startPos = marker.position
                     val endPos = LatLng(lat, lng)
-
-                    // Shortest-path rotation delta, normalized to (-180, 180]
-                    val startBearing = marker.rotation
-                    val deltaBearing = ((bearing.toFloat() - startBearing + 540f) % 360f) - 180f
 
                     ValueAnimator.ofFloat(0f, 1f).apply {
                         this.duration = duration
@@ -368,7 +397,6 @@ class CapacitorGoogleMap(
                             val newLng = startPos.longitude +
                                     fraction * (endPos.longitude - startPos.longitude)
                             marker.position = LatLng(newLat, newLng)
-                            marker.rotation = (startBearing + deltaBearing * fraction + 360f) % 360f
                         }
                         addListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(animation: Animator) {

@@ -186,8 +186,9 @@ export interface UpdateMarkerArgs {
   markerId: string;
   lat: number;
   lng: number;
-  bearing: number;
+  bearing?: number;
   duration?: number;
+  markerIcon: string;
 }
 
 export interface CapacitorGoogleMapsPlugin extends Plugin {

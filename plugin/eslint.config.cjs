@@ -19,6 +19,7 @@ module.exports = [
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
+        HTMLImageElement: 'readonly',
         HTMLElement: 'readonly',
         customElements: 'readonly',
         ResizeObserver: 'readonly',

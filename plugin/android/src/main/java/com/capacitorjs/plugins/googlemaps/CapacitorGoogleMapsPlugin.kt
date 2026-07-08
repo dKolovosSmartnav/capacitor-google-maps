@@ -303,6 +303,8 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             val markerId = call.getString("markerId")
             markerId ?: throw InvalidArgumentsError("markerId is missing")
 
+            val markerIcon = call.getString("markerIcon", "")
+
             val lat = call.getDouble("lat")
             val lng = call.getDouble("lng")
             val bearing = call.getDouble("bearing")
@@ -314,7 +316,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
             val map = maps[id] ?: throw MapNotFoundError()
 
             Log.i("Bearing of marker to animate : " , bearing.toString())
-            map.updateMarker(markerId, lat, lng, bearing!!, duration!!) { result ->
+            map.updateMarker(markerId, lat, lng, markerIcon!!, bearing, duration!!) { result ->
                 result.onSuccess { call.resolve() }.onFailure { error -> throw error }
             }
         } catch (e: GoogleMapsError) {

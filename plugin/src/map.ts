@@ -384,12 +384,20 @@ export class GoogleMap {
   /**
    * Animation of marker
    */
-  async updateMarker(markerId: string, lat: number, lng: number, bearing: number, duration = 1000): Promise<void> {
+  async updateMarker(
+    markerId: string,
+    lat: number,
+    lng: number,
+    markerIcon: string,
+    bearing?: number,
+    duration = 1000,
+  ): Promise<void> {
     await CapacitorGoogleMaps.updateMarker({
       id: this.id,
       markerId,
       lat,
       lng,
+      markerIcon,
       bearing,
       duration,
     });

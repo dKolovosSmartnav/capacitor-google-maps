@@ -337,7 +337,7 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
   }
 
   async updateMarker(_args: UpdateMarkerArgs): Promise<void> {
-    const { id, markerId, lat, lng, bearing, duration = 1000 } = _args;
+    const { id, markerId, lat, lng, markerIcon, bearing, duration = 1000 } = _args;
     const mapData = this.maps[id];
     if (!mapData) {
       throw new Error(`Map with id '${id}' not found`);
@@ -349,15 +349,20 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
 
     const start = marker.position as google.maps.LatLngLiteral;
     const end = { lat, lng };
-
-    // Read the marker's current rotation (stored on the element from a previous animation)
     const content = marker.content as HTMLElement | null;
-    const startBearing = content ? parseFloat(content.dataset.bearing ?? '0') : 0;
 
-    // Shortest-path delta: normalize to (-180, 180]
-    let deltaBearing = 0;
+    // Swap icon if provided
+    if (markerIcon && content) {
+      const img = content.querySelector('img') as HTMLImageElement | null;
+      if (img) {
+        img.src = markerIcon;
+      }
+    }
+
+    // Set rotation directly to the given bearing — no interpolation from previous value
     if (bearing !== undefined && content) {
-      deltaBearing = ((bearing - startBearing + 540) % 360) - 180;
+      content.style.transform = `rotate(${bearing % 360}deg)`;
+      content.dataset.bearing = String(bearing % 360);
     }
 
     const startTime = performance.now();
@@ -369,12 +374,6 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
           lat: start.lat + (end.lat - start.lat) * t,
           lng: start.lng + (end.lng - start.lng) * t,
         };
-
-        if (bearing !== undefined && content) {
-          const currBearing = (startBearing + deltaBearing * t + 360) % 360;
-          content.style.transform = `rotate(${currBearing}deg)`;
-          content.dataset.bearing = String(currBearing);
-        }
 
         if (t < 1) {
           requestAnimationFrame(step);
