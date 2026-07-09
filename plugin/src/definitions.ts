@@ -144,6 +144,9 @@ export interface StyleSpan {
   segments?: number;
 }
 
+/**
+ * Options for updating a marker's position, bearing, duration, and icon.
+ */
 export interface UpdateMarkerOptions {
   id: string;
   markerId: string;
@@ -152,6 +155,15 @@ export interface UpdateMarkerOptions {
   bearing?: number;
   duration?: number;
   markerIcon: string;
+}
+
+/**
+ * Options for setting the visibility of a marker.
+ */
+export interface SetMarkerVisibilityOptions {
+  id: string;
+  markerId: string;
+  isVisible: boolean;
 }
 
 /**

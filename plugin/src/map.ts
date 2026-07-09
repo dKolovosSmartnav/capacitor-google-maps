@@ -21,6 +21,7 @@ import type {
   PolylineCallbackData,
   TileOverlay,
   UpdateMarkerOptions,
+  SetMarkerVisibilityOptions,
 } from './definitions';
 import { LatLngBounds, MapType } from './definitions';
 import type { CreateMapArgs } from './implementation';
@@ -41,6 +42,7 @@ export interface GoogleMapInterface {
   removeTileOverlay(id: string): Promise<void>;
   addMarker(marker: Marker): Promise<string>;
   updateMarker(options: UpdateMarkerOptions): Promise<void>;
+  setMarkerVisibility(options: SetMarkerVisibilityOptions): Promise<void>;
   addMarkers(markers: Marker[]): Promise<string[]>;
   removeMarker(id: string): Promise<void>;
   removeMarkers(ids: string[]): Promise<void>;
@@ -400,6 +402,20 @@ export class GoogleMap {
       markerIcon,
       bearing,
       duration,
+    });
+  }
+
+  /**
+   * Sets the visibility of a marker
+   *
+   * @param options
+   * @returns
+   */
+  async setMarkerVisibility(markerId: string, isVisible: boolean): Promise<void> {
+    return CapacitorGoogleMaps.setMarkerVisibility({
+      id: this.id,
+      markerId: markerId,
+      isVisible: isVisible,
     });
   }
 

@@ -327,6 +327,22 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
     }
 
     @PluginMethod
+    fun setMarkerVisibility(call: PluginCall) {
+        val id = call.getString("id") ?: return call.reject("id is missing")
+        val markerId = call.getString("markerId") ?: return call.reject("markerId is missing")
+        val isVisible = call.getBoolean("isVisible") ?: return call.reject("isVisible is missing")
+
+        val map = maps[id] ?: return call.reject("Map not found")
+
+        map.setMarkerVisibility(markerId, isVisible) { result ->
+            result.fold(
+                onSuccess = { call.resolve() },
+                onFailure = { call.reject(it.message) }
+            )
+        }
+    }
+
+    @PluginMethod
     fun addMarkers(call: PluginCall) {
         try {
             val id = call.getString("id")

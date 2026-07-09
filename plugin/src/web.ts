@@ -30,6 +30,7 @@ import type {
   RemovePolylinesArgs,
   RemoveTileOverlayArgs,
   UpdateMarkerArgs,
+  SetMarkerVisibilityArgs,
 } from './implementation';
 
 export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogleMapsPlugin {
@@ -383,6 +384,23 @@ export class CapacitorGoogleMapsWeb extends WebPlugin implements CapacitorGoogle
       };
       requestAnimationFrame(step);
     });
+  }
+
+  async setMarkerVisibility(_args: SetMarkerVisibilityArgs): Promise<void> {
+    const { id, markerId, isVisible } = _args;
+    const mapData = this.maps[id];
+    if (!mapData) {
+      throw new Error(`Map with id '${id}' not found`);
+    }
+    const marker = mapData.markers[markerId];
+    if (!marker) {
+      throw new Error(`Marker '${markerId}' not found on map '${id}'`);
+    }
+
+    const content = marker.content as HTMLElement | null;
+    if (content) {
+      content.style.display = isVisible ? '' : 'none';
+    }
   }
 
   async removeMarkers(_args: RemoveMarkersArgs): Promise<void> {

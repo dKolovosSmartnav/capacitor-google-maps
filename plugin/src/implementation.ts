@@ -2,6 +2,7 @@ import type { Plugin } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type {
+  SetMarkerVisibilityOptions,
   UpdateMarkerOptions,
   CameraConfig,
   Circle,
@@ -191,6 +192,12 @@ export interface UpdateMarkerArgs {
   markerIcon: string;
 }
 
+export interface SetMarkerVisibilityArgs {
+  id: string;
+  markerId: string;
+  isVisible: boolean;
+}
+
 export interface CapacitorGoogleMapsPlugin extends Plugin {
   create(options: CreateMapArgs): Promise<void>;
   enableTouch(args: { id: string }): Promise<void>;
@@ -199,6 +206,7 @@ export interface CapacitorGoogleMapsPlugin extends Plugin {
   removeTileOverlay(args: RemoveTileOverlayArgs): Promise<void>;
   addMarker(args: AddMarkerArgs): Promise<{ id: string }>;
   updateMarker(options: UpdateMarkerOptions): Promise<void>;
+  setMarkerVisibility(args: SetMarkerVisibilityOptions): Promise<void>;
   addMarkers(args: AddMarkersArgs): Promise<{ ids: string[] }>;
   removeMarker(args: RemoveMarkerArgs): Promise<void>;
   removeMarkers(args: RemoveMarkersArgs): Promise<void>;

@@ -365,6 +365,7 @@ Vue({
 * [`removeTileOverlay(...)`](#removetileoverlay)
 * [`addMarker(...)`](#addmarker)
 * [`updateMarker(...)`](#updatemarker)
+* [`setMarkerVisibility(...)`](#setmarkervisibility)
 * [`addMarkers(...)`](#addmarkers)
 * [`removeMarker(...)`](#removemarker)
 * [`removeMarkers(...)`](#removemarkers)
@@ -518,6 +519,19 @@ updateMarker(options: UpdateMarkerOptions) => Promise<void>
 | Param         | Type                                                                |
 | ------------- | ------------------------------------------------------------------- |
 | **`options`** | <code><a href="#updatemarkeroptions">UpdateMarkerOptions</a></code> |
+
+--------------------
+
+
+### setMarkerVisibility(...)
+
+```typescript
+setMarkerVisibility(options: SetMarkerVisibilityOptions) => Promise<void>
+```
+
+| Param         | Type                                                                              |
+| ------------- | --------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#setmarkervisibilityoptions">SetMarkerVisibilityOptions</a></code> |
 
 --------------------
 
@@ -1120,6 +1134,8 @@ https://tools.ietf.org/html/rfc7946#section-3.1.2
 
 #### UpdateMarkerOptions
 
+Options for updating a marker's position, bearing, duration, and icon.
+
 | Prop             | Type                |
 | ---------------- | ------------------- |
 | **`id`**         | <code>string</code> |
@@ -1129,6 +1145,17 @@ https://tools.ietf.org/html/rfc7946#section-3.1.2
 | **`bearing`**    | <code>number</code> |
 | **`duration`**   | <code>number</code> |
 | **`markerIcon`** | <code>string</code> |
+
+
+#### SetMarkerVisibilityOptions
+
+Options for setting the visibility of a marker.
+
+| Prop            | Type                 |
+| --------------- | -------------------- |
+| **`id`**        | <code>string</code>  |
+| **`markerId`**  | <code>string</code>  |
+| **`isVisible`** | <code>boolean</code> |
 
 
 #### Polygon

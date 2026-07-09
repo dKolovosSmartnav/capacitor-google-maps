@@ -415,6 +415,30 @@ class CapacitorGoogleMap(
         }
     }
 
+    fun setMarkerVisibility(markerId: String, isVisible: Boolean, callback: (Result<Unit>) -> Unit) {
+        try {
+            googleMap ?: throw GoogleMapNotAvailable()
+
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val wrapper = markers[markerId] ?: throw MarkerNotFoundError()
+                    val marker = wrapper.googleMapMarker
+                        ?: throw GoogleMapsError("GoogleMap Marker not available")
+
+                    marker.isVisible = isVisible
+
+                    callback(Result.success(Unit))
+                } catch (e: GoogleMapsError) {
+                    callback(Result.failure(e))
+                } catch (e: Exception) {
+                    callback(Result.failure(GoogleMapsError(e.localizedMessage ?: "Visibility update error")))
+                }
+            }
+        } catch (e: GoogleMapsError) {
+            callback(Result.failure(e))
+        }
+    }
+
 
     fun addPolygons(newPolygons: List<CapacitorGoogleMapsPolygon>, callback: (ids: Result<List<String>>) -> Unit) {
         try {

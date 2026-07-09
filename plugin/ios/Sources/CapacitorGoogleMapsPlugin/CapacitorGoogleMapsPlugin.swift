@@ -1,6 +1,6 @@
+import Capacitor
 // swiftlint:disable file_length
 import Foundation
-import Capacitor
 import GoogleMaps
 import GoogleMapsUtils
 import QuartzCore
@@ -19,7 +19,9 @@ extension GMSMapViewType {
         case "None":
             return .none
         default:
-            print("CapacitorGoogleMaps Warning: unknown mapView type '\(mapType)'.  Defaulting to normal.")
+            print(
+                "CapacitorGoogleMaps Warning: unknown mapView type '\(mapType)'.  Defaulting to normal."
+            )
             return .normal
         }
     }
@@ -44,19 +46,23 @@ extension GMSMapViewType {
 extension CGRect {
     static func fromJSObject(_ jsObject: JSObject) throws -> CGRect {
         guard let width = jsObject["width"] as? Double else {
-            throw GoogleMapErrors.invalidArguments("bounds object is missing the required 'width' property")
+            throw GoogleMapErrors.invalidArguments(
+                "bounds object is missing the required 'width' property")
         }
 
         guard let height = jsObject["height"] as? Double else {
-            throw GoogleMapErrors.invalidArguments("bounds object is missing the required 'height' property")
+            throw GoogleMapErrors.invalidArguments(
+                "bounds object is missing the required 'height' property")
         }
 
         guard let x = jsObject["x"] as? Double else {
-            throw GoogleMapErrors.invalidArguments("bounds object is missing the required 'x' property")
+            throw GoogleMapErrors.invalidArguments(
+                "bounds object is missing the required 'x' property")
         }
 
         guard let y = jsObject["y"] as? Double else {
-            throw GoogleMapErrors.invalidArguments("bounds object is missing the required 'y' property")
+            throw GoogleMapErrors.invalidArguments(
+                "bounds object is missing the required 'y' property")
         }
 
         return CGRect(x: x, y: y, width: width, height: height)
@@ -76,6 +82,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         CAPPluginMethod(name: "removeTileOverlay", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addMarker", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateMarker", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setMarkerVisibility", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addMarkers", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addPolygons", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "addPolylines", returnType: CAPPluginReturnPromise),
@@ -102,7 +109,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         CAPPluginMethod(name: "getMapBounds", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "fitBounds", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "mapBoundsContains", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "mapBoundsExtend", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "mapBoundsExtend", returnType: CAPPluginReturnPromise),
     ]
     private var maps = [String: Map]()
     private var isInitialized = false
@@ -297,40 +304,64 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         }
     }
 
-
     @objc func updateMarker(_ call: CAPPluginCall) {
-    do {
-        guard let id = call.getString("id") else {
-            throw GoogleMapErrors.invalidMapId
-        }
-        guard let markerId = call.getInt("markerId") else {
-            throw GoogleMapErrors.invalidArguments("markerId is missing")
-        }
-        guard let lat = call.getDouble("lat"),
-              let lng = call.getDouble("lng") else {
-            throw GoogleMapErrors.invalidArguments("lat or lng is missing")
-        }
-        let markerIcon = call.getString("markerIcon")
-        let bearing = call.getDouble("bearing")
-        let duration = call.getDouble("duration") ?? 1.0
+        do {
+            guard let id = call.getString("id") else {
+                throw GoogleMapErrors.invalidMapId
+            }
+            guard let markerId = call.getInt("markerId") else {
+                throw GoogleMapErrors.invalidArguments("markerId is missing")
+            }
+            guard let lat = call.getDouble("lat"),
+                let lng = call.getDouble("lng")
+            else {
+                throw GoogleMapErrors.invalidArguments("lat or lng is missing")
+            }
+            let markerIcon = call.getString("markerIcon")
+            let bearing = call.getDouble("bearing")
+            let duration = call.getDouble("duration") ?? 1.0
 
-        guard let map = self.maps[id] else {
-            throw GoogleMapErrors.mapNotFound
+            guard let map = self.maps[id] else {
+                throw GoogleMapErrors.mapNotFound
+            }
+
+            try map.updateMarker(
+                markerId: markerId,
+                to: LatLng(lat: lat, lng: lng),
+                markerIcon: markerIcon,
+                bearing: bearing,
+                duration: duration
+            )
+
+            call.resolve()
+        } catch {
+            handleError(call, error: error)
         }
-
-        try map.updateMarker(
-            markerId: markerId,
-            to: LatLng(lat: lat, lng: lng),
-            markerIcon: markerIcon,
-            bearing: bearing,
-            duration: duration
-        )
-
-        call.resolve()
-    } catch {
-        handleError(call, error: error)
     }
-}
+
+    @objc func setMarkerVisibility(_ call: CAPPluginCall) {
+        do {
+            guard let id = call.getString("id") else {
+                throw GoogleMapErrors.invalidMapId
+            }
+            guard let markerId = call.getInt("markerId") else {
+                throw GoogleMapErrors.invalidArguments("markerId is missing")
+            }
+            guard let isVisible = call.getBool("isVisible") else {
+                throw GoogleMapErrors.invalidArguments("isVisible is missing")
+            }
+
+            guard let map = self.maps[id] else {
+                throw GoogleMapErrors.mapNotFound
+            }
+
+            try map.setMarkerVisibility(markerId: markerId, isVisible: isVisible)
+
+            call.resolve()
+        } catch {
+            handleError(call, error: error)
+        }
+    }
 
     @objc func addMarkers(_ call: CAPPluginCall) {
         do {
@@ -359,9 +390,11 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             let ids = try map.addMarkers(markers: markers)
 
-            call.resolve(["ids": ids.map({ id in
-                return String(id)
-            })])
+            call.resolve([
+                "ids": ids.map({ id in
+                    return String(id)
+                })
+            ])
 
         } catch {
             handleError(call, error: error)
@@ -456,9 +489,11 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             let ids = try map.addPolygons(polygons: shapes)
 
-            call.resolve(["ids": ids.map({ id in
-                return String(id)
-            })])
+            call.resolve([
+                "ids": ids.map({ id in
+                    return String(id)
+                })
+            ])
         } catch {
             handleError(call, error: error)
         }
@@ -491,9 +526,11 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             let ids = try map.addPolylines(lines: lines)
 
-            call.resolve(["ids": ids.map({ id in
-                return String(id)
-            })])
+            call.resolve([
+                "ids": ids.map({ id in
+                    return String(id)
+                })
+            ])
         } catch {
             handleError(call, error: error)
         }
@@ -510,7 +547,8 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             }
 
             if polygonIdsStrings.isEmpty {
-                throw GoogleMapErrors.invalidArguments("polygonIds requires at least one polygon id")
+                throw GoogleMapErrors.invalidArguments(
+                    "polygonIds requires at least one polygon id")
             }
 
             let ids: [Int] = try polygonIdsStrings.map { idString in
@@ -560,9 +598,11 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             let ids = try map.addCircles(circles: circles)
 
-            call.resolve(["ids": ids.map({ id in
-                return String(id)
-            })])
+            call.resolve([
+                "ids": ids.map({ id in
+                    return String(id)
+                })
+            ])
         } catch {
             handleError(call, error: error)
         }
@@ -613,7 +653,8 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             }
 
             if polylineIdsStrings.isEmpty {
-                throw GoogleMapErrors.invalidArguments("polylineIds requires at least one polyline id")
+                throw GoogleMapErrors.invalidArguments(
+                    "polylineIds requires at least one polyline id")
             }
 
             let ids: [Int] = try polylineIdsStrings.map { idString in
@@ -810,7 +851,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
             let locationStatus = checkLocationPermission()
 
-            if enabled &&  !(locationStatus == "granted" || locationStatus == "prompt") {
+            if enabled && !(locationStatus == "granted" || locationStatus == "prompt") {
                 throw GoogleMapErrors.permissionsDeniedLocation
             }
 
@@ -1009,11 +1050,13 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
     private func getGMSCoordinateBounds(_ bounds: JSObject) throws -> GMSCoordinateBounds {
         guard let southwest = bounds["southwest"] as? JSObject else {
-            throw GoogleMapErrors.unhandledError("Bounds southwest property not formatted properly.")
+            throw GoogleMapErrors.unhandledError(
+                "Bounds southwest property not formatted properly.")
         }
 
         guard let northeast = bounds["northeast"] as? JSObject else {
-            throw GoogleMapErrors.unhandledError("Bounds northeast property not formatted properly.")
+            throw GoogleMapErrors.unhandledError(
+                "Bounds northeast property not formatted properly.")
         }
 
         return GMSCoordinateBounds(
@@ -1034,20 +1077,22 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         return CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }
 
-    private func formatMapBoundsForResponse(bounds: GMSCoordinateBounds?, cameraPosition: GMSCameraPosition) -> PluginCallResultData {
+    private func formatMapBoundsForResponse(
+        bounds: GMSCoordinateBounds?, cameraPosition: GMSCameraPosition
+    ) -> PluginCallResultData {
         return [
             "southwest": [
                 "lat": bounds?.southWest.latitude,
-                "lng": bounds?.southWest.longitude
+                "lng": bounds?.southWest.longitude,
             ],
             "center": [
                 "lat": cameraPosition.target.latitude,
-                "lng": cameraPosition.target.longitude
+                "lng": cameraPosition.target.longitude,
             ],
             "northeast": [
                 "lat": bounds?.northEast.latitude,
-                "lng": bounds?.northEast.longitude
-            ]
+                "lng": bounds?.northEast.longitude,
+            ],
         ]
     }
 
@@ -1058,16 +1103,16 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
         return [
             "southwest": [
                 "lat": bounds.southWest.latitude,
-                "lng": bounds.southWest.longitude
+                "lng": bounds.southWest.longitude,
             ],
             "center": [
                 "lat": centerLatitude,
-                "lng": centerLongitude
+                "lng": centerLongitude,
             ],
             "northeast": [
                 "lat": bounds.northEast.latitude,
-                "lng": bounds.northEast.longitude
-            ]
+                "lng": bounds.northEast.longitude,
+            ],
         ]
     }
 
@@ -1103,7 +1148,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             "latitude": cameraPosition.target.latitude,
             "longitude": cameraPosition.target.longitude,
             "tilt": cameraPosition.viewingAngle,
-            "zoom": cameraPosition.zoom
+            "zoom": cameraPosition.zoom,
         ]
 
         self.notifyListeners("onBoundsChanged", data: data)
@@ -1112,48 +1157,58 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
     // onCameraMoveStarted
     public func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
-        self.notifyListeners("onCameraMoveStarted", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "isGesture": gesture
-        ])
+        self.notifyListeners(
+            "onCameraMoveStarted",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "isGesture": gesture,
+            ])
     }
 
     // onMapClick
     public func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
-        self.notifyListeners("onMapClick", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "latitude": coordinate.latitude,
-            "longitude": coordinate.longitude
-        ])
+        self.notifyListeners(
+            "onMapClick",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "latitude": coordinate.latitude,
+                "longitude": coordinate.longitude,
+            ])
     }
 
     // onPolygonClick, onPolylineClick, onCircleClick
     public func mapView(_ mapView: GMSMapView, didTap overlay: GMSOverlay) {
         if let polygon = overlay as? GMSPolygon {
-            self.notifyListeners("onPolygonClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "polygonId": String(overlay.hash.hashValue),
-                "tag": polygon.userData as? String
-            ])
+            self.notifyListeners(
+                "onPolygonClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "polygonId": String(overlay.hash.hashValue),
+                    "tag": polygon.userData as? String,
+                ])
         }
 
         if let circle = overlay as? GMSCircle {
-            self.notifyListeners("onCircleClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "circleId": String(overlay.hash.hashValue),
-                "tag": circle.userData as? String,
-                "latitude": circle.position.latitude,
-                "longitude": circle.position.longitude,
-                "radius": circle.radius
-            ])
+            self.notifyListeners(
+                "onCircleClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "circleId": String(overlay.hash.hashValue),
+                    "tag": circle.userData as? String,
+                    "latitude": circle.position.latitude,
+                    "longitude": circle.position.longitude,
+                    "radius": circle.radius,
+                ])
         }
 
         if let polyline = overlay as? GMSPolyline {
-            self.notifyListeners("onPolylineClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "polylineId": String(overlay.hash.hashValue),
-                "tag": polyline.userData as? String
-            ])
+            self.notifyListeners(
+                "onPolylineClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "polylineId": String(overlay.hash.hashValue),
+                    "tag": polyline.userData as? String,
+                ])
         }
     }
 
@@ -1168,64 +1223,74 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
                     "latitude": item.position.latitude,
                     "longitude": item.position.longitude,
                     "title": item.title ?? "",
-                    "snippet": item.snippet ?? ""
+                    "snippet": item.snippet ?? "",
                 ])
             }
 
-            self.notifyListeners("onClusterClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "latitude": cluster.position.latitude,
-                "longitude": cluster.position.longitude,
-                "size": cluster.count,
-                "items": items
-            ])
+            self.notifyListeners(
+                "onClusterClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "latitude": cluster.position.latitude,
+                    "longitude": cluster.position.longitude,
+                    "size": cluster.count,
+                    "items": items,
+                ])
         } else {
-            self.notifyListeners("onMarkerClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "markerId": String(marker.hash.hashValue),
-                "latitude": marker.position.latitude,
-                "longitude": marker.position.longitude,
-                "title": marker.title ?? "",
-                "snippet": marker.snippet ?? ""
-            ])
+            self.notifyListeners(
+                "onMarkerClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "markerId": String(marker.hash.hashValue),
+                    "latitude": marker.position.latitude,
+                    "longitude": marker.position.longitude,
+                    "title": marker.title ?? "",
+                    "snippet": marker.snippet ?? "",
+                ])
         }
         return false
     }
 
     // onMarkerDragStart
     public func mapView(_ mapView: GMSMapView, didBeginDragging marker: GMSMarker) {
-        self.notifyListeners("onMarkerDragStart", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "markerId": String(marker.hash.hashValue),
-            "latitude": marker.position.latitude,
-            "longitude": marker.position.longitude,
-            "title": marker.title ?? "",
-            "snippet": marker.snippet ?? ""
-        ])
+        self.notifyListeners(
+            "onMarkerDragStart",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "markerId": String(marker.hash.hashValue),
+                "latitude": marker.position.latitude,
+                "longitude": marker.position.longitude,
+                "title": marker.title ?? "",
+                "snippet": marker.snippet ?? "",
+            ])
     }
 
     // onMarkerDrag
     public func mapView(_ mapView: GMSMapView, didDrag marker: GMSMarker) {
-        self.notifyListeners("onMarkerDrag", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "markerId": String(marker.hash.hashValue),
-            "latitude": marker.position.latitude,
-            "longitude": marker.position.longitude,
-            "title": marker.title ?? "",
-            "snippet": marker.snippet ?? ""
-        ])
+        self.notifyListeners(
+            "onMarkerDrag",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "markerId": String(marker.hash.hashValue),
+                "latitude": marker.position.latitude,
+                "longitude": marker.position.longitude,
+                "title": marker.title ?? "",
+                "snippet": marker.snippet ?? "",
+            ])
     }
 
     // onMarkerDragEnd
     public func mapView(_ mapView: GMSMapView, didEndDragging marker: GMSMarker) {
-        self.notifyListeners("onMarkerDragEnd", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "markerId": String(marker.hash.hashValue),
-            "latitude": marker.position.latitude,
-            "longitude": marker.position.longitude,
-            "title": marker.title ?? "",
-            "snippet": marker.snippet ?? ""
-        ])
+        self.notifyListeners(
+            "onMarkerDragEnd",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "markerId": String(marker.hash.hashValue),
+                "latitude": marker.position.latitude,
+                "longitude": marker.position.longitude,
+                "title": marker.title ?? "",
+                "snippet": marker.snippet ?? "",
+            ])
     }
 
     // onClusterInfoWindowClick, onInfoWindowClick
@@ -1239,51 +1304,62 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
                     "latitude": item.position.latitude,
                     "longitude": item.position.longitude,
                     "title": item.title ?? "",
-                    "snippet": item.snippet ?? ""
+                    "snippet": item.snippet ?? "",
                 ])
             }
 
-            self.notifyListeners("onClusterInfoWindowClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "latitude": cluster.position.latitude,
-                "longitude": cluster.position.longitude,
-                "size": cluster.count,
-                "items": items
-            ])
+            self.notifyListeners(
+                "onClusterInfoWindowClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "latitude": cluster.position.latitude,
+                    "longitude": cluster.position.longitude,
+                    "size": cluster.count,
+                    "items": items,
+                ])
         } else {
-            self.notifyListeners("onInfoWindowClick", data: [
-                "mapId": self.findMapIdByMapView(mapView),
-                "markerId": String(marker.hash.hashValue),
-                "latitude": marker.position.latitude,
-                "longitude": marker.position.longitude,
-                "title": marker.title ?? "",
-                "snippet": marker.snippet ?? ""
-            ])
+            self.notifyListeners(
+                "onInfoWindowClick",
+                data: [
+                    "mapId": self.findMapIdByMapView(mapView),
+                    "markerId": String(marker.hash.hashValue),
+                    "latitude": marker.position.latitude,
+                    "longitude": marker.position.longitude,
+                    "title": marker.title ?? "",
+                    "snippet": marker.snippet ?? "",
+                ])
         }
     }
 
     // onMyLocationButtonClick
     public func didTapMyLocationButtonForMapView(for mapView: GMSMapView) -> Bool {
-        self.notifyListeners("onMyLocationButtonClick", data: [
-            "mapId": self.findMapIdByMapView(mapView)
-        ])
+        self.notifyListeners(
+            "onMyLocationButtonClick",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView)
+            ])
         return false
     }
 
     // onMyLocationClick
     public func mapView(_ mapView: GMSMapView, didTapMyLocation location: CLLocationCoordinate2D) {
-        self.notifyListeners("onMyLocationButtonClick", data: [
-            "mapId": self.findMapIdByMapView(mapView),
-            "latitude": location.latitude,
-            "longitude": location.longitude
-        ])
+        self.notifyListeners(
+            "onMyLocationButtonClick",
+            data: [
+                "mapId": self.findMapIdByMapView(mapView),
+                "latitude": location.latitude,
+                "longitude": location.longitude,
+            ])
     }
 }
 
 // snippet from https://www.hackingwithswift.com/example-code/uicolor/how-to-convert-a-hex-color-to-a-uicolor
 extension UIColor {
     public convenience init?(hex: String) {
-        let r, g, b, a: CGFloat
+        let r: CGFloat
+        let g: CGFloat
+        let b: CGFloat
+        let a: CGFloat
 
         if hex.hasPrefix("#") {
             let start = hex.index(hex.startIndex, offsetBy: 1)
@@ -1293,10 +1369,10 @@ extension UIColor {
             var hexNumber: UInt64 = 0
             if hexColor.count == 8 {
                 if scanner.scanHexInt64(&hexNumber) {
-                    r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
-                    g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
-                    b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
-                    a = CGFloat(hexNumber & 0x000000ff) / 255
+                    r = CGFloat((hexNumber & 0xff00_0000) >> 24) / 255
+                    g = CGFloat((hexNumber & 0x00ff_0000) >> 16) / 255
+                    b = CGFloat((hexNumber & 0x0000_ff00) >> 8) / 255
+                    a = CGFloat(hexNumber & 0x0000_00ff) / 255
 
                     self.init(red: r, green: g, blue: b, alpha: a)
                     return

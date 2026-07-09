@@ -397,6 +397,16 @@ public class Map {
         }
     }
 
+    func setMarkerVisibility(markerId: Int, isVisible: Bool) throws {
+        guard let marker = markers[markerId] else {
+            throw GoogleMapErrors.markerNotFound
+        }
+
+        DispatchQueue.main.async {
+            marker.opacity = isVisible ? 1.0 : 0.0
+        }
+    }
+
     func addMarkers(markers: [Marker]) throws -> [Int] {
         var markerHashes: [Int] = []
 
