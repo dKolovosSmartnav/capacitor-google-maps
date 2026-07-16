@@ -296,6 +296,8 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             }
 
             let markerId = try map.addMarker(marker: marker)
+            
+            print(markerId)
 
             call.resolve(["id": String(markerId)])
 
@@ -309,8 +311,10 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             guard let id = call.getString("id") else {
                 throw GoogleMapErrors.invalidMapId
             }
-            guard let markerId = call.getInt("markerId") else {
-                throw GoogleMapErrors.invalidArguments("markerId is missing")
+            guard let markerIdString = call.getString("markerId"),
+                let markerId = Int(markerIdString)
+            else {
+                throw GoogleMapErrors.invalidArguments("markerId is missing or invalid")
             }
             guard let lat = call.getDouble("lat"),
                 let lng = call.getDouble("lng")
@@ -344,8 +348,10 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
             guard let id = call.getString("id") else {
                 throw GoogleMapErrors.invalidMapId
             }
-            guard let markerId = call.getInt("markerId") else {
-                throw GoogleMapErrors.invalidArguments("markerId is missing")
+            guard let markerIdString = call.getString("markerId"),
+                let markerId = Int(markerIdString)
+            else {
+                throw GoogleMapErrors.invalidArguments("markerId is missing or invalid")
             }
             guard let isVisible = call.getBool("isVisible") else {
                 throw GoogleMapErrors.invalidArguments("isVisible is missing")

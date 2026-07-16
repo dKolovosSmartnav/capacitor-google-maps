@@ -89,6 +89,7 @@ public class Map {
     var circles = [Int: GMSCircle]()
     var polylines = [Int: GMSPolyline]()
     var markerIcons = [String: UIImage]()
+    var markerIconSizes = [Int: CGSize]()
 
     // swiftlint:disable identifier_name
     public static let MAP_TAG = 99999
@@ -330,6 +331,10 @@ public class Map {
 
             self.markers[newMarker.hash.hashValue] = newMarker
 
+            if let iconSize = marker.iconSize {
+                self.markerIconSizes[newMarker.hash.hashValue] = iconSize  // add this
+            }
+
             markerHash = newMarker.hash.hashValue
         }
 
@@ -339,6 +344,7 @@ public class Map {
     func updateMarker(
         markerId: Int, to target: LatLng, markerIcon: String?, bearing: Double?, duration: Double
     ) throws {
+        
         guard let marker = markers[markerId] else {
             throw GoogleMapErrors.markerNotFound
         }
