@@ -936,6 +936,7 @@ public class CapacitorGoogleMapsPlugin: CAPPlugin, GMSMapViewDelegate, CAPBridge
 
     @objc func onDisplay(_ call: CAPPluginCall) {
         do {
+            Thread.sleep(forTimeInterval: 0.1) // 0.1 seconds = 100ms, reads more clearly than usleep's microsecond math
             guard let id = call.getString("id") else {
                 throw GoogleMapErrors.invalidMapId
             }
