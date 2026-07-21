@@ -307,7 +307,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
 
             val lat = call.getDouble("lat")
             val lng = call.getDouble("lng")
-            val bearing = call.getDouble("bearing")
+            val bearing = call.getFloat("bearing")
             if (lat == null || lng == null) {
                 throw InvalidArgumentsError("lat or lng is missing")
             }

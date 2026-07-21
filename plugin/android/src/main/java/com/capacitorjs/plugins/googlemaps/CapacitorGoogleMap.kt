@@ -343,7 +343,7 @@ class CapacitorGoogleMap(
         }
     }
 
-    fun updateMarker(markerId: String, lat: Double, lng: Double, markerIcon: String, bearing: Double?, duration: Long, callback: (Result<Unit>) -> Unit) {
+    fun updateMarker(markerId: String, lat: Double, lng: Double, markerIcon: String, bearing: Float?, duration: Long, callback: (Result<Unit>) -> Unit) {
         try {
             googleMap ?: throw GoogleMapNotAvailable()
 
@@ -382,7 +382,7 @@ class CapacitorGoogleMap(
 
                     // Set rotation directly to the given bearing — no interpolation from previous value
                     if (bearing != null) {
-                        marker.rotation = bearing.toFloat() % 360f
+                        marker.rotation = bearing
                     }
 
                     val startPos = marker.position
