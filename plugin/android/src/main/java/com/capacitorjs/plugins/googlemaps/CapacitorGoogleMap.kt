@@ -1006,6 +1006,8 @@ class CapacitorGoogleMap(
             }
         }
 
+        marker.bearing?.let { markerOptions.rotation(it) } // update marker options with rotation before return.
+
         marker.markerOptions = markerOptions
 
         return markerOptions

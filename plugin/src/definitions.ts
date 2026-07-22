@@ -482,6 +482,11 @@ export interface Marker {
    * @default 0
    */
   zIndex?: number;
+
+  /**
+   * Specifies the initial bearing of the marker if exists upon the creation.
+   */
+  bearing?: number;
 }
 
 /**

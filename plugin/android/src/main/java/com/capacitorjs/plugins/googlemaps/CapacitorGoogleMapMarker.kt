@@ -21,6 +21,7 @@ class CapacitorGoogleMapMarker(fromJSONObject: JSONObject): ClusterItem {
     var draggable: Boolean = false
     var googleMapMarker: Marker? = null
     var colorHue: Float? = null
+    var bearing: Float? = null //bearing in double precision as float
     var markerOptions: MarkerOptions? = null
 
     init {
@@ -39,6 +40,7 @@ class CapacitorGoogleMapMarker(fromJSONObject: JSONObject): ClusterItem {
         snippet = fromJSONObject.optString("snippet")
         isFlat = fromJSONObject.optBoolean("isFlat", false)
         iconUrl = fromJSONObject.optString("iconUrl")
+        bearing = fromJSONObject.optDouble("bearing").toFloat()
         if (fromJSONObject.has("iconSize")) {
             val iconSizeObject = fromJSONObject.getJSONObject("iconSize")
             iconSize = Size(iconSizeObject.optInt("width", 0), iconSizeObject.optInt("height", 0))
