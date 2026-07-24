@@ -344,7 +344,7 @@ public class Map {
     func updateMarker(
         markerId: Int, to target: LatLng, markerIcon: String?, bearing: Double?, duration: Double
     ) throws {
-        
+
         guard let marker = markers[markerId] else {
             throw GoogleMapErrors.markerNotFound
         }
@@ -795,6 +795,13 @@ public class Map {
         if let iconAnchor = marker.iconAnchor {
             newMarker.groundAnchor = iconAnchor
         }
+
+        // All markers are attached to the map surface.
+        newMarker.isFlat = true
+
+        // Apply bearing when provided.
+        // A nil bearing defaults to 0 degrees.
+        newMarker.rotation = marker.bearing ?? 0.0
 
         // cache and reuse marker icon uiimages
         if let iconUrl = marker.iconUrl {
