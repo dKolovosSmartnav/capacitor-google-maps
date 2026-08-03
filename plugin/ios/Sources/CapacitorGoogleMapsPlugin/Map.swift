@@ -355,9 +355,9 @@ public class Map {
                 self.updateMarkerIcon(marker: marker, markerId: markerId, iconUrl: iconUrl)
             }
 
-            // Set rotation directly to the given bearing — no interpolation from previous value
-            if let bearing = bearing {
-                marker.rotation = bearing.truncatingRemainder(dividingBy: 360)
+            // Change rotation only when a valid bearing is provided.
+            if let bearing, bearing.isFinite {
+               marker.rotation = bearing.truncatingRemainder(dividingBy: 360)
             }
 
             CATransaction.begin()
